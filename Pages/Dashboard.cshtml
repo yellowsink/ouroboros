@@ -5,8 +5,31 @@
 }
 
 <h1>Dashboard</h1>
-<h2>The device manager will go here.</h2>
+<h2>Your Nodes</h2>
 
-<p>
-	If you're not logged in and you can see this then something is not working right, yay.
-</p>
+<table>
+	<thead>
+	<th>Name</th>
+	<th>Status</th>
+	<th>Expiry</th>
+	<th>IP Addresses</th>
+	</thead>
+	<tbody>
+	@foreach (var node in Model.NodesToShow)
+	{
+		<tr>
+			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
+			<td>
+				@(node.Online ? "Online" : $"Last seen {new DateTime(node.LastSeen.Seconds * TimeSpan.TicksPerSecond)}")
+			</td>
+			<td>@node.Expiry.Parse()</td>
+		    <td>
+			    @foreach (var ip in node.IpAddresses ?? [])
+			    {
+				    <div>@ip</div>
+			    }
+		    </td>
+	    </tr>
+    }
+	</tbody>
+</table>

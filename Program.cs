@@ -1,6 +1,5 @@
 using Ouroboros;
 
-/*
 // https://andrewlock.net/exploring-the-dotnet-8-preview-comparing-createbuilder-to-the-new-createslimbuilder-method/#what-s-missing-from-createslimbuilder-
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -19,7 +18,4 @@ app.MapRazorPages();
 
 app.MapGet("/", () => Results.Redirect("/ouroboros/login"));
 
-app.Run();*/
-
-var res = await Headscale.InvokeHeadscale("nodes", "list", "-o", "json-line");
-Console.WriteLine(res);
+app.Run();
