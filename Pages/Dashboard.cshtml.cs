@@ -1,16 +1,30 @@
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Ouroboros.Pages;
 
 public class DashboardModel : PageModel
 {
-	public Headscale.HeadscaleNode[] NodesToShow = [];
+	public AuthedUser AuthedUser = null!; // safety: if page is rendered, user was set in ongetasync
+	
+	public IEnumerable<Headscale.HeadscaleNode> YourNodes = [];
+	public IEnumerable<Headscale.HeadscaleNode> OtherNodes = [];
     
-	public async Task<PageResult> OnGetAsync()
+	public async Task<IActionResult> OnGetAsync()
 	{
-		// TODO: check user name and only show their devices
+		var userSer = HttpContext.Session.Get("user");
+		if (userSer == null)
+			return Redirect("/ouroboros/auth");
 
-		NodesToShow = await Headscale.NodesList();
+		AuthedUser = JsonSerializer.Deserialize<AuthedUser>(userSer)!;
+		if (AuthedUser == null!)
+			return Redirect("/ouroboros/auth");
+		
+		var nodes = await Headscale.NodesList();
+
+		YourNodes  = nodes.Where(n => n.User?.Name == AuthedUser.HeadscaleName);
+		OtherNodes = nodes.Where(n => n.User?.Name != AuthedUser.HeadscaleName);
 
 		return Page();
 	}

@@ -5,31 +5,68 @@
 }
 
 <h1>Dashboard</h1>
+
+Logged in as
+@(Model.AuthedUser.GithubPretty ?? Model.AuthedUser.GithubName) (@Model.AuthedUser.HeadscaleName on Headscale)
+
+<a href="/ouroboros/auth/logout?then=/ouroboros/dashboard">Click here to log out</a>
+
 <h2>Your Nodes</h2>
 
 <table>
 	<thead>
 	<th>Name</th>
-	<th>Status</th>
-	<th>Expiry</th>
 	<th>IP Addresses</th>
+	<th>Status</th>
+	<th>Actions</th>
 	</thead>
 	<tbody>
-	@foreach (var node in Model.NodesToShow)
+	@foreach (var node in Model.YourNodes)
 	{
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
-				@(node.Online ? "Online" : $"Last seen {new DateTime(node.LastSeen.Seconds * TimeSpan.TicksPerSecond)}")
+				@foreach (var ip in node.IpAddresses ?? [])
+				{
+					<div>@ip</div>
+				}
 			</td>
-			<td>@node.Expiry.Parse()</td>
-		    <td>
-			    @foreach (var ip in node.IpAddresses ?? [])
-			    {
-				    <div>@ip</div>
-			    }
-		    </td>
-	    </tr>
-    }
+			<td>
+				@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")
+				@* TODO: exit node markers, etc *@
+			</td>
+			<td>TODO</td>
+		</tr>
+	}
+	</tbody>
+</table>
+
+<h2>Other Users' Nodes</h2>
+
+<table>
+	<thead>
+	<th>Name</th>
+	<th>IP Addresses</th>
+	<th>Status</th>
+	<th>Owner</th>
+	</thead>
+	<tbody>
+	@foreach (var node in Model.OtherNodes)
+	{
+		<tr>
+			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
+			<td>
+				@foreach (var ip in node.IpAddresses ?? [])
+				{
+					<div>@ip</div>
+				}
+			</td>
+			<td>
+				@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")
+				@* TODO: exit node markers, etc *@
+			</td>
+			<td>@node.User?.Name</td>
+		</tr>
+	}
 	</tbody>
 </table>

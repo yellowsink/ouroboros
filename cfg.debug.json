@@ -1,7 +1,12 @@
 {
   "hs_is_remote": true,
   "hs_address": "michiscale.yellows.ink:443",
-  "//": "I'm using tokens with an expiry of one day lol, chill",
   "hs_api_key": "lkCh3TBkhQ.x2JtgfqbpuGDxCt0koXDtr9DGe3Bg-UZ-WO_NaegCZg",
-  "_hs_bin_path": "/usr/bin/headscale"
+  "_hs_bin_path": "/usr/bin/headscale",
+  "gh_client_id": "Iv1.73490910ae11b57e",
+  "gh_client_secret": "secret! not committing this!",
+  "user_map": {
+    "19270622": "sink",
+    "42352565": "kasimir"
+  }
 }

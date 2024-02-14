@@ -34,4 +34,20 @@ public class Config
 	/// (OPTIONAL) The path to the headscale CLI binary to use
 	/// </summary>
 	public string hs_bin_path { get; init; } = "headscale";
+	
+	/// <summary>
+	/// The Github OAuth2 Client ID
+	/// </summary>
+	public string gh_client_id { get; init; }
+	
+	/// <summary>
+	/// The Github OAuth2 Client Secret
+	/// </summary>
+	public string gh_client_secret { get; init; }
+	
+	/// <summary>
+	/// A map of github user IDs to headscale users
+	/// </summary>
+	// ReSharper disable once CollectionNeverUpdated.Global
+	public Dictionary<string, string> user_map { get; init; }
 }
