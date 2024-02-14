@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Ouroboros.Models.Auth;
 
 namespace Ouroboros.Controllers;
 
@@ -15,13 +16,12 @@ public class AuthController : Controller
 		}
 	};
 
-	[Route("/auth/callback")]
 	public async Task<IActionResult> Callback(string code, string state)
 	{
 		var user = await GetUser(await GetAccessToken(code));
 
 		if (!Config.C.user_map.ContainsKey(user.id.ToString()))
-			return Redirect($"/ouroboros/auth/notregistered?login={user.login}");
+			return View("NotRegistered", new NotRegisteredModel(user.login));
 		
 		// keep track of the authentication for later
 		HttpContext.Session.Set(
@@ -35,12 +35,20 @@ public class AuthController : Controller
 		return Redirect(then);
 	}
 	
-	[Route("/auth/logout")]
 	public IActionResult Logout(string then)
 	{
 		HttpContext.Session.Remove("user");
 		return Redirect(then);
 	}
+
+	public IActionResult Index(string? nodeKey)
+		=> View(
+			new IndexModel(
+				Convert.ToBase64String(
+					nodeKey == null
+						? "/ouroboros/dashboard"u8
+						: Encoding.UTF8.GetBytes($"/register/nodekey:{nodeKey}")),
+				nodeKey == null ? "to access the dashboard" : "to add a node"));
 	
 	private async Task<GhUserRes> GetUser(string accessToken)
 	{

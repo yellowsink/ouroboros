@@ -1,5 +1,4 @@
-﻿@page
-@model DashboardModel
+﻿@model Ouroboros.Models.DashboardModel
 @{
 	ViewData["Title"] = "Dashboard";
 }
@@ -7,7 +6,7 @@
 <h1>Dashboard</h1>
 
 Logged in as
-@(Model.AuthedUser.GithubPretty ?? Model.AuthedUser.GithubName) (@Model.AuthedUser.HeadscaleName on Headscale)
+@(Model.User.GithubPretty ?? Model.User.GithubName) (@Model.User.HeadscaleName on Headscale)
 
 <a href="/ouroboros/auth/logout?then=/ouroboros/dashboard">Click here to log out</a>
 
