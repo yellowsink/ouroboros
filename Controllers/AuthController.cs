@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Ouroboros.Models.Auth;
+using Ouroboros.Models;
 
 namespace Ouroboros.Controllers;
 
@@ -21,7 +21,7 @@ public class AuthController : Controller
 		var user = await GetUser(await GetAccessToken(code));
 
 		if (!Config.C.user_map.ContainsKey(user.id.ToString()))
-			return View("NotRegistered", new NotRegisteredModel(user.login));
+			return View("NotRegistered", new AuthNotRegisteredModel(user.login));
 		
 		// keep track of the authentication for later
 		HttpContext.Session.Set(
@@ -35,6 +35,7 @@ public class AuthController : Controller
 		return Redirect(then);
 	}
 	
+	[HttpPost]
 	public IActionResult Logout(string then)
 	{
 		HttpContext.Session.Remove("user");
@@ -43,7 +44,7 @@ public class AuthController : Controller
 
 	public IActionResult Index(string? nodeKey)
 		=> View(
-			new IndexModel(
+			new AuthIndexModel(
 				Convert.ToBase64String(
 					nodeKey == null
 						? "/ouroboros/dashboard"u8

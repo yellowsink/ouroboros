@@ -3,6 +3,7 @@
   "hs_address": "michiscale.yellows.ink:443",
   "hs_api_key": "lvpG0ByMvg.vaxUZpckOJdiy-1TjcpRh_jcuS4Qy2mCW26a2CUAGDU",
   "_hs_bin_path": "/usr/bin/headscale",
+  "hs_login_url": "michiscale.yellows.ink",
   "gh_client_id": "Iv1.73490910ae11b57e",
   "gh_client_secret": "secret! not committing this!",
   "user_map": {

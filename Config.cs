@@ -36,6 +36,11 @@ public class Config
 	public string hs_bin_path { get; init; } = "headscale";
 	
 	/// <summary>
+	/// The public URL your headscale instance is accessible on (the --login-server= argument to tailscale up)
+	/// </summary>
+	public string hs_login_url { get; init; }
+	
+	/// <summary>
 	/// The Github OAuth2 Client ID
 	/// </summary>
 	public string gh_client_id { get; init; }

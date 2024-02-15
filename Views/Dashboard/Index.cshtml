@@ -8,7 +8,62 @@
 Logged in as
 @(Model.User.GithubPretty ?? Model.User.GithubName) (@Model.User.HeadscaleName on Headscale)
 
-<a href="/ouroboros/auth/logout?then=/ouroboros/dashboard">Click here to log out</a>
+<form asp-controller="Auth" asp-action="Logout">
+	<input type="hidden" name="then" value="/ouroboros/dashboard"/>
+	<button type="submit">Click here to log out</button>
+</form>
+
+<details>
+	<summary>Add a device...</summary>
+	
+	<div style="padding-left: .5rem; margin-left: .5rem; border-left: 1px solid gray">
+		<h2>Add a device interactively</h2>
+        	
+        <p>The login server URL is <code>https://@Config.C.hs_login_url</code>.</p>
+        
+        <p>On Linux, you can use <code>tailscale up --login-server=https://@Config.C.hs_login_url</code>.</p>
+        <p>
+        	On Android, you repeatedly open the menu on the menu on the login screen until you have the
+        	<code>Change Server</code> option.
+        </p>
+        <p>
+        	On Windows, you can edit the registry <a href="https://headscale.net/windows-client/">as shown here</a>.
+        	Supposedly you can also use the command line as is on Linux, but this may have config persistence issues.
+        </p>
+        <p>
+        	On iOS, you can find Tailscale in the iOS settings app, and put the login server URL into
+        	<code>Alternative Coordination Server URL</code>.
+        </p>
+        
+		<h2>Add a device via auth key</h2>
+		<p>
+			See instructions on using auth keys <a href="https://tailscale.com/kb/1085/auth-keys">here</a>.
+		</p>
+		<details>
+			<summary>Generate an auth key</summary>
+			
+			<form style="padding-left: .5rem; margin-left: .5rem; border-left: 1px solid gray">
+				<div>
+					<label for="genkey-reusable">Reusable</label>
+					<input type="checkbox" name="reusable" id="genkey-reusable" />
+				</div>
+				<div>
+					<label for="genkey-expiry">Expiry</label>
+					<input type="text" name="Expiry" id="genkey-expiry" />
+				</div>
+				<button type="submit">Generate</button>
+			</form>
+		</details>
+		
+		@if (false) @* Model.Keys.Length > 0 *@
+		{
+			<h3>Existing auth keys</h3>
+			@* @foreach (var key in Model.Keys)
+			{
+			} *@
+		}
+	</div>
+</details>
 
 <h2>Your Nodes</h2>
 
