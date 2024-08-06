@@ -35,7 +35,7 @@ Logged in as
         	<code>Alternative Coordination Server URL</code>.
         </p>
         
-		<h2>Add a device via auth key</h2>
+		@*<h2>Add a device via auth key</h2>
 		<p>
 			See instructions on using auth keys <a href="https://tailscale.com/kb/1085/auth-keys">here</a>.
 		</p>
@@ -55,13 +55,13 @@ Logged in as
 			</form>
 		</details>
 		
-		@if (false) @* Model.Keys.Length > 0 *@
+		@if (false) $1$ Model.Keys.Length > 0 #1#
 		{
 			<h3>Existing auth keys</h3>
-			@* @foreach (var key in Model.Keys)
+			$1$ @foreach (var key in Model.Keys)
 			{
-			} *@
-		}
+			} #1#
+		}*@
 	</div>
 </details>
 

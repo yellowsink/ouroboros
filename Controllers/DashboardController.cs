@@ -6,6 +6,16 @@ namespace Ouroboros.Controllers;
 
 public class DashboardController : Controller
 {
+	private async Task<bool> NodeIsOwned(int id)
+	{
+		var username = AuthedUser.FromCtx(HttpContext)?.HeadscaleName;
+		if (username == null) return false;
+		
+		var nodes = await Headscale.NodesList();
+		var node  = nodes.FirstOrDefault(n => n.Id == id);
+		return node?.User?.Name == username;
+	}
+	
 	public async Task<IActionResult> Index()
 	{ 
 		var user = AuthedUser.FromCtx(HttpContext);
@@ -23,7 +33,7 @@ public class DashboardController : Controller
 	[HttpPost]
 	public async Task<IActionResult> DeleteNode(int id)
 	{
-		if (AuthedUser.FromCtx(HttpContext) == null) return Unauthorized();
+		if (!await NodeIsOwned(id)) return Unauthorized();
         
 		var res = await Headscale.NodeDelete(id);
 		// TODO: test!
@@ -35,19 +45,16 @@ public class DashboardController : Controller
 	[HttpPost]
 	public async Task<IActionResult> ExpireNode(int id)
 	{
-		if (AuthedUser.FromCtx(HttpContext) == null) return Unauthorized();
+		if (!await NodeIsOwned(id)) return Unauthorized();
 		
-		var res = await Headscale.NodeExpire(id);
-		// TODO: wrong!
-		return res
-				   ? RedirectToAction("Index")
-				   : StatusCode(500, "500: Could not expire node.");
+		await Headscale.NodeExpire(id);
+		return RedirectToAction("Index");
 	}
 	
 	[HttpPost]
 	public async Task<IActionResult> RenameNode(int id, string name)
 	{
-		if (AuthedUser.FromCtx(HttpContext) == null) return Unauthorized();
+		if (!await NodeIsOwned(id)) return Unauthorized();
 		
 		await Headscale.NodeRename(id, name);
 		return RedirectToAction("Index");

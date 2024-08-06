@@ -59,11 +59,8 @@ public static class Headscale
 		return res.Trim() == "{}";
 	}
 	
-	public static async Task<bool> NodeExpire(int id)
-	{
-		var res = await Invoke("nodes", "expire", "-i", id.ToString());
-		return res.Trim() == "{}";
-	}
+	public static async Task<HeadscaleNode> NodeExpire(int id)
+		=> JsonSerializer.Deserialize<HeadscaleNode>(await Invoke("nodes", "expire", "-i", id.ToString()), Jso)!;
 
 	public static async Task<HeadscaleNode> NodeRegister(string user, string nodekey)
 		=> JsonSerializer.Deserialize<HeadscaleNode>(await Invoke("nodes", "register", "--user", user, "--key", nodekey), Jso)!;
