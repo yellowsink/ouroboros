@@ -16,7 +16,7 @@ public class RegisterController : Controller
 		
 		var user = AuthedUser.FromCtx(HttpContext);
 		if (user == null)
-			return RedirectToAction("Index", "Auth", new { nodeKey = trimmedNk });
+			return Redirect($"/ouroboros/auth?nodekey={trimmedNk}");
 
 		return View(new RegisterIndexModel(user, trimmedNk));
 	}
@@ -29,6 +29,6 @@ public class RegisterController : Controller
 		if (user == null) return Unauthorized();
 
 		await Headscale.NodeRegister(user.HeadscaleName, "nodekey:" + nodeKey);
-		return RedirectToAction("Index", "Dashboard");
+		return Redirect("/ouroboros/dashboard");
 	}
 }

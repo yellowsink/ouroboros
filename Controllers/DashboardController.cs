@@ -38,7 +38,7 @@ public class DashboardController : Controller
 		var res = await Headscale.NodeDelete(id);
 		// TODO: test!
 		return res
-				   ? RedirectToAction("Index")
+				   ? Redirect("/ouroboros/dashboard")
 				   : StatusCode(500, "500: Could not remove node.");
 	}
 	
@@ -48,7 +48,7 @@ public class DashboardController : Controller
 		if (!await NodeIsOwned(id)) return Unauthorized();
 		
 		await Headscale.NodeExpire(id);
-		return RedirectToAction("Index");
+		return Redirect("/ouroboros/dashboard");
 	}
 	
 	[HttpPost]
@@ -57,6 +57,6 @@ public class DashboardController : Controller
 		if (!await NodeIsOwned(id)) return Unauthorized();
 		
 		await Headscale.NodeRename(id, name);
-		return RedirectToAction("Index");
+		return Redirect("/ouroboros/dashboard");
 	}
 }
