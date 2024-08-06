@@ -13,9 +13,6 @@ sed -i 's/<DOCKER_CLIENT_ID>/'$GH_CLIENT_ID'/' cfg.json
 sed -i 's/<DOCKER_CLIENT_SECRET>/'$GH_CLIENT_SECRET'/' cfg.json
 sed -i 's/"<DOCKER_USER_MAP>"/'"$USER_MAP"'/' cfg.json
 
-# debug
-cat cfg.json
-
 # run ouroboros
 # using exec makes sure we are correctly passing through SIGTERMs
 exec dotnet Ouroboros.dll
