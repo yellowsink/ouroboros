@@ -8,11 +8,7 @@ public class DashboardController : Controller
 {
 	public async Task<IActionResult> Index()
 	{ 
-		var userSer = HttpContext.Session.Get("user");
-		if (userSer == null)
-			return Redirect("/ouroboros/auth");
-
-		var user = JsonSerializer.Deserialize<AuthedUser>(userSer);
+		var user = AuthedUser.FromCtx(HttpContext);
 		if (user == null)
 			return Redirect("/ouroboros/auth");
 		
@@ -27,7 +23,10 @@ public class DashboardController : Controller
 	[HttpPost]
 	public async Task<IActionResult> DeleteNode(int id)
 	{
+		if (AuthedUser.FromCtx(HttpContext) == null) return Unauthorized();
+        
 		var res = await Headscale.NodeDelete(id);
+		// TODO: test!
 		return res
 				   ? RedirectToAction("Index")
 				   : StatusCode(500, "500: Could not remove node.");
@@ -36,7 +35,10 @@ public class DashboardController : Controller
 	[HttpPost]
 	public async Task<IActionResult> ExpireNode(int id)
 	{
+		if (AuthedUser.FromCtx(HttpContext) == null) return Unauthorized();
+		
 		var res = await Headscale.NodeExpire(id);
+		// TODO: wrong!
 		return res
 				   ? RedirectToAction("Index")
 				   : StatusCode(500, "500: Could not expire node.");
@@ -45,6 +47,8 @@ public class DashboardController : Controller
 	[HttpPost]
 	public async Task<IActionResult> RenameNode(int id, string name)
 	{
+		if (AuthedUser.FromCtx(HttpContext) == null) return Unauthorized();
+		
 		await Headscale.NodeRename(id, name);
 		return RedirectToAction("Index");
 	}
