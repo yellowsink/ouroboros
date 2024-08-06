@@ -116,8 +116,7 @@ Logged in as
 				</dialog>
 
 				@* requires js because using <details> here would be horrid. *@
-				<noscript><style>.rename-trigger { display: none }</style></noscript>
-				<a asp-action="RenameNode" class="rename-trigger" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</a>
+				<a asp-action="RenameNode" class="js-only-action" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</a>
 				<dialog>
 					@if (node.GivenName == node.Name)
 					{
@@ -128,29 +127,6 @@ Logged in as
 						<p>Pick a new name for "@node.GivenName", originally called "@node.Name"</p>
 					}
 					
-					<form asp-action="RenameNode">
-						<input type="text" name="id" value="@node.Id" style="display: none" />
-						<input type="text" name="name" />
-						<button type="submit">Rename</button>
-					</form>
-					<form method="dialog">
-						<button type="submit">Cancel</button>
-					</form>
-				</dialog>
-
-				@* requires js because using <details> here would be horrid. *@
-				<noscript><style>.rename-trigger { display: none }</style></noscript>
-				<a asp-action="RenameNode" class="rename-trigger" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</a>
-				<dialog>
-					@if (node.GivenName == node.Name)
-					{
-					<p>Pick a new name for "@node.GivenName"</p>
-					}
-					else
-					{
-					<p>Pick a new name for "@node.GivenName", originally called "@node.Name"</p>
-					}
-
 					<form asp-action="RenameNode">
 						<input type="text" name="id" value="@node.Id" style="display: none" />
 						<input type="text" name="name" />
@@ -203,3 +179,4 @@ Logged in as
 		padding: .25rem .75rem;
 	}
 </style>
+<noscript><style>.js-only-action { display: none }</style></noscript>
