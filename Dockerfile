@@ -18,5 +18,5 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:6c4df091e4e531bb93bdbfe7e7f0998e
 WORKDIR /App
 COPY --from=ouro-build-env /App/out .
 
-EXPOSE 5000/tcp
+EXPOSE 8080/tcp
 ENTRYPOINT ["./docker-run.sh"]
