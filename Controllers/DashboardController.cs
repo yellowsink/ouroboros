@@ -23,4 +23,29 @@ public class DashboardController : Controller
 
 		return View(new DashboardModel(user, yourNodes, otherNodes));
 	}
+
+	[HttpPost]
+	public async Task<IActionResult> DeleteNode(int id)
+	{
+		var res = await Headscale.NodeDelete(id);
+		return res
+				   ? RedirectToAction("Index")
+				   : StatusCode(500, "500: Could not remove node.");
+	}
+	
+	[HttpPost]
+	public async Task<IActionResult> ExpireNode(int id)
+	{
+		var res = await Headscale.NodeExpire(id);
+		return res
+				   ? RedirectToAction("Index")
+				   : StatusCode(500, "500: Could not expire node.");
+	}
+	
+	[HttpPost]
+	public async Task<IActionResult> RenameNode(int id, string name)
+	{
+		await Headscale.NodeRename(id, name);
+		return RedirectToAction("Index");
+	}
 }

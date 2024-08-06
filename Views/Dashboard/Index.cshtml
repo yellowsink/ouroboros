@@ -89,7 +89,78 @@ Logged in as
 				@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")
 				@* TODO: exit node markers, etc *@
 			</td>
-			<td>TODO</td>
+			<td>
+				@* asp-action will make this work without js, with js html5 dialog will override it. *@
+				<a asp-action="DeleteNode" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Delete node</a>
+				<dialog>
+					<p>Delete this node? this is irreversible.</p>
+					<form asp-action="DeleteNode">
+						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<button type="submit">Yes, delete</button>
+					</form>
+					<form method="dialog">
+						<button type="submit">No!</button>
+					</form>
+				</dialog>
+
+				<a asp-action="ExpireNode" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Logout node</a>
+				<dialog>
+					<p>Logout (expire) this node? It will remain setup on your tailnet but need reregistering to come online.</p>
+					<form asp-action="ExpireNode">
+						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<button type="submit">Yes, logout</button>
+					</form>
+					<form method="dialog">
+						<button type="submit">No!</button>
+					</form>
+				</dialog>
+
+				@* requires js because using <details> here would be horrid. *@
+				<noscript><style>.rename-trigger { display: none }</style></noscript>
+				<a asp-action="RenameNode" class="rename-trigger" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</a>
+				<dialog>
+					@if (node.GivenName == node.Name)
+					{
+						<p>Pick a new name for "@node.GivenName"</p>
+					}
+					else
+					{
+						<p>Pick a new name for "@node.GivenName", originally called "@node.Name"</p>
+					}
+					
+					<form asp-action="RenameNode">
+						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<input type="text" name="name" />
+						<button type="submit">Rename</button>
+					</form>
+					<form method="dialog">
+						<button type="submit">Cancel</button>
+					</form>
+				</dialog>
+
+				@* requires js because using <details> here would be horrid. *@
+				<noscript><style>.rename-trigger { display: none }</style></noscript>
+				<a asp-action="RenameNode" class="rename-trigger" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</a>
+				<dialog>
+					@if (node.GivenName == node.Name)
+					{
+					<p>Pick a new name for "@node.GivenName"</p>
+					}
+					else
+					{
+					<p>Pick a new name for "@node.GivenName", originally called "@node.Name"</p>
+					}
+
+					<form asp-action="RenameNode">
+						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<input type="text" name="name" />
+						<button type="submit">Rename</button>
+					</form>
+					<form method="dialog">
+						<button type="submit">Cancel</button>
+					</form>
+				</dialog>
+			</td>
 		</tr>
 	}
 	</tbody>

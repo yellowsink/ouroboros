@@ -4,13 +4,13 @@ using System.Text.Json;
 namespace Ouroboros;
 
 /* wrapping progress list (only APIs we need):
- * [ ] nodes:
+ * [x] nodes:
  *   [x] list
- *   [ ] delete
- *   [ ] expire
- *   [ ] register
- *   [ ] rename
- *   [ ] tag
+ *   [x] delete
+ *   [x] expire
+ *   [x] register
+ *   [x] rename
+ *   [x] tag
  * [ ] preauthkeys:
  *   [ ] create
  *   [ ] expire
@@ -34,7 +34,7 @@ public static class Headscale
 	
 	private static async Task<string> Invoke(params string[] args)
 	{
-		var psi = new ProcessStartInfo(Config.C.hs_bin_path, args)
+		var psi = new ProcessStartInfo(Config.C.hs_bin_path, args.Concat(["-o", "json-line"]))
 		{
 			RedirectStandardOutput = true
 		};
@@ -51,8 +51,35 @@ public static class Headscale
 	}
 	
 	public static async Task<HeadscaleNode[]> NodesList()
-		=> JsonSerializer.Deserialize<HeadscaleNode[]>(await Invoke("nodes", "list", "-o", "json-line"), Jso)!;
+		=> JsonSerializer.Deserialize<HeadscaleNode[]>(await Invoke("nodes", "list"), Jso)!;
+
+	public static async Task<bool> NodeDelete(int id)
+	{
+		var res = await Invoke("nodes", "delete", "-i", id.ToString(), "--force");
+		return res.Trim() == "{}";
+	}
+	
+	public static async Task<bool> NodeExpire(int id)
+	{
+		var res = await Invoke("nodes", "expire", "-i", id.ToString());
+		return res.Trim() == "{}";
+	}
+
+	public static async Task<HeadscaleNode> NodeRegister(string user, string nodekey)
+		=> JsonSerializer.Deserialize<HeadscaleNode>(await Invoke("nodes", "register", "--user", user, "--key", nodekey), Jso)!;
+	
+	public static async Task<HeadscaleNode> NodeRename(int id, string name)
+		=> JsonSerializer.Deserialize<HeadscaleNode>(await Invoke("nodes", "rename", name, "-i", id.ToString()), Jso)!;
     
+	/*public static async Task<HeadscaleNode> NodeTags(int id, string[] tags)
+	{
+		var args = new [] {"node", "tags", "-i", id.ToString()}
+				  .Concat(tags.SelectMany(t => new[] {"-t", "tag:" + t}))
+				  .ToArray();
+		
+		return JsonSerializer.Deserialize<HeadscaleNode>(await Invoke(args), Jso)!;
+	}*/
+
 	public struct HeadscaleTimestamp
 	{
 		public long  Seconds { get; set; }
@@ -81,6 +108,7 @@ public static class Headscale
 		public HeadscaleTimestamp LastSuccessfulUpdate { get; set; }
 		public HeadscaleTimestamp Expiry               { get; set; }
 		public HeadscaleTimestamp CreatedAt            { get; set; }
+		public string[]?          ForcedTags           { get; set; }
 		public string?            GivenName            { get; set; }
 		public bool               Online               { get; set; }
 	}
