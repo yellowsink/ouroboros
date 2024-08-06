@@ -80,9 +80,9 @@ Logged in as
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
-				@foreach (var ip in node.IpAddresses ?? [])
+				@foreach (var ip in (node.IpAddresses ?? []).Order())
 				{
-					<div>@ip</div>
+					<div><code>@ip</code></div>
 				}
 			</td>
 			<td>
@@ -176,14 +176,14 @@ Logged in as
 	<th>Owner</th>
 	</thead>
 	<tbody>
-	@foreach (var node in Model.OtherNodes)
+	@foreach (var node in Model.OtherNodes.OrderBy(n => n.User?.Id).ThenBy(n => n.Id))
 	{
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
-				@foreach (var ip in node.IpAddresses ?? [])
+				@foreach (var ip in (node.IpAddresses ?? []).Order())
 				{
-					<div>@ip</div>
+					<div><code>@ip</code></div>
 				}
 			</td>
 			<td>
@@ -195,3 +195,11 @@ Logged in as
 	}
 	</tbody>
 </table>
+
+<style>
+	table { border-collapse: collapse; }
+	td {
+		border: 1px solid grey;
+		padding: .25rem .75rem;
+	}
+</style>

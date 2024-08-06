@@ -79,10 +79,12 @@ public static class Headscale
 
 	public struct HeadscaleTimestamp
 	{
+		private const int NsecsPerTick = 100; // 1 tick = 100ns
+		
 		public long  Seconds { get; set; }
 		public ulong Nanos   { get; set; }
 
-		public DateTime Parse() => new(Math.Max(DateTime.MinValue.Ticks / TimeSpan.TicksPerSecond, Seconds) * TimeSpan.TicksPerSecond + (long) (Nanos / 100));
+		public DateTime Parse() => DateTime.UnixEpoch.AddSeconds(Seconds).AddTicks((long) Nanos / NsecsPerTick);
 	}
 
 	public class HeadscaleUser
