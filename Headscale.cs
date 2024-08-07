@@ -15,11 +15,11 @@ namespace Ouroboros;
  *   [ ] create
  *   [ ] expire
  *   [ ] list
- * [ ] routes:
- *   [ ] delete
- *   [ ] disable
- *   [ ] enable
- *   [ ] list
+ * [x] routes:
+ *   [x] delete
+ *   [x] disable
+ *   [x] enable
+ *   [x] list
  */
 
 /// <summary>
@@ -77,6 +77,18 @@ public static class Headscale
 		return JsonSerializer.Deserialize<HeadscaleNode>(await Invoke(args), Jso)!;
 	}*/
 
+	public static async Task<HeadscaleRoute[]> RoutesList()
+		=> JsonSerializer.Deserialize<HeadscaleRoute[]>(await Invoke("routes", "list"), Jso)!;
+	
+	public static async Task<bool> RouteEnable(uint id)
+		=> (await Invoke("routes", "enable", "-r", id.ToString())).Trim() == "{}";
+	
+	public static async Task<bool> RouteDisable(uint id)
+		=> (await Invoke("routes", "disable", "-r", id.ToString())).Trim() == "{}";
+	
+	public static async Task<bool> RouteDelete(uint id)
+		=> (await Invoke("routes", "delete", "-r", id.ToString())).Trim() == "{}";
+
 	public struct HeadscaleTimestamp
 	{
 		private const int NsecsPerTick = 100; // 1 tick = 100ns
@@ -87,14 +99,14 @@ public static class Headscale
 		public DateTime Parse() => DateTime.UnixEpoch.AddSeconds(Seconds).AddTicks((long) Nanos / NsecsPerTick);
 	}
 
-	public class HeadscaleUser
+	public sealed class HeadscaleUser
 	{
 		public string?            Id        { get; set; }
 		public string?            Name      { get; set; }
 		public HeadscaleTimestamp CreatedAt { get; set; }
 	}
 
-	public class HeadscaleNode
+	public sealed class HeadscaleNode
 	{
 		public int                Id                   { get; set; }
 		public string?            MachineKey           { get; set; }
@@ -110,5 +122,16 @@ public static class Headscale
 		public string[]?          ForcedTags           { get; set; }
 		public string?            GivenName            { get; set; }
 		public bool               Online               { get; set; }
+	}
+
+	public sealed class HeadscaleRoute
+	{
+		public int                Id         { get; set; }
+		public HeadscaleNode?     Machine    { get; set; }
+		public string?            Prefix     { get; set; }
+		public bool               Advertised { get; set; }
+		public bool               Enabled    { get; set; }
+		public HeadscaleTimestamp CreatedAt  { get; set; }
+		public HeadscaleTimestamp UpdatedAt  { get; set; }
 	}
 }

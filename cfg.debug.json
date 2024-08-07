@@ -1,11 +1,11 @@
 {
   "hs_is_remote": true,
   "hs_address": "michiscale.yellows.ink:443",
-  "hs_api_key": "lvpG0ByMvg.vaxUZpckOJdiy-1TjcpRh_jcuS4Qy2mCW26a2CUAGDU",
+  "hs_api_key": "xN3bgrjw9g.MAd8-glbEZrn2HeZ9TDjKVkiDltSzLMPPc-UDKAawm0",
   "_hs_bin_path": "/usr/bin/headscale",
   "hs_login_url": "michiscale.yellows.ink",
-  "gh_client_id": "Iv1.73490910ae11b57e",
-  "gh_client_secret": "secret! not committing this!",
+  "gh_client_id": "Iv23liZUP7FTELYvhFs8",
+  "gh_client_secret": "b4c0b88b761fdc79c956cd481659c0658d9fe731",
   "user_map": {
     "19270622": "sink",
     "42352565": "kasimir"

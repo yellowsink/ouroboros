@@ -77,6 +77,9 @@ Logged in as
 	<tbody>
 	@foreach (var node in Model.YourNodes)
 	{
+		var hasENode = Model.YourExitNodes.TryGetValue(node.Id, out var enode);
+		var eNodeEnabled = hasENode && (enode.Item1.Enabled && enode.Item2.Enabled);
+		
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
@@ -86,16 +89,22 @@ Logged in as
 				}
 			</td>
 			<td>
-				@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")
-				@* TODO: exit node markers, etc *@
+				<div>@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")</div>
+				@if (hasENode)
+				{
+					<div>Exit Node @(eNodeEnabled ? "Enabled" : "Advertised")</div>
+				}
 			</td>
-			<td>
-				@* asp-action will make this work without js, with js html5 dialog will override it. *@
-				<a asp-action="DeleteNode" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Delete node</a>
+			<td class="formwrap">
+				@* make this work without js, with js html5 dialog will override it. *@
+				<form asp-action="DeleteNode">
+					<input type="hidden" name="id" value="@node.Id" />
+					<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Delete node</button>
+				</form>
 				<dialog>
 					<p>Delete this node? this is irreversible.</p>
 					<form asp-action="DeleteNode">
-						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<input type="hidden" name="id" value="@node.Id" />
 						<button type="submit">Yes, delete</button>
 					</form>
 					<form method="dialog">
@@ -103,11 +112,14 @@ Logged in as
 					</form>
 				</dialog>
 
-				<a asp-action="ExpireNode" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Logout node</a>
+				<form asp-action="ExpireNode">
+					<input type="hidden" name="id" value="@node.Id" />
+					<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Logout node</button>
+				</form>
 				<dialog>
 					<p>Logout (expire) this node? It will remain setup on your tailnet but need reregistering to come online.</p>
 					<form asp-action="ExpireNode">
-						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<input type="hidden" name="id" value="@node.Id" />
 						<button type="submit">Yes, logout</button>
 					</form>
 					<form method="dialog">
@@ -116,7 +128,7 @@ Logged in as
 				</dialog>
 
 				@* requires js because using <details> here would be horrid. *@
-				<a asp-action="RenameNode" class="js-only-action" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</a>
+				<button class="js-only-action" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</button>
 				<dialog>
 					@if (node.GivenName == node.Name)
 					{
@@ -126,9 +138,9 @@ Logged in as
 					{
 						<p>Pick a new name for "@node.GivenName", originally called "@node.Name"</p>
 					}
-					
+
 					<form asp-action="RenameNode">
-						<input type="text" name="id" value="@node.Id" style="display: none" />
+						<input type="hidden" name="id" value="@node.Id" />
 						<input type="text" name="name" />
 						<button type="submit">Rename</button>
 					</form>
@@ -136,6 +148,24 @@ Logged in as
 						<button type="submit">Cancel</button>
 					</form>
 				</dialog>
+				
+				
+				@if (eNodeEnabled)
+				{
+				<form asp-action="DisableENode">
+					<input type="hidden" name="id4" value="@enode.Item1.Id" />
+					<input type="hidden" name="id6" value="@enode.Item2.Id" />
+					<button type="submit">Disable Exit Node</button>
+				</form>
+				}
+				else if (hasENode)
+				{
+				<form asp-action="EnableENode">
+					<input type="hidden" name="id4" value="@enode.Item1.Id" />
+					<input type="hidden" name="id6" value="@enode.Item2.Id" />
+					<button type="submit">Enable Exit Node</button>
+				</form>
+				}
 			</td>
 		</tr>
 	}
@@ -154,6 +184,9 @@ Logged in as
 	<tbody>
 	@foreach (var node in Model.OtherNodes.OrderBy(n => n.User?.Id).ThenBy(n => n.Id))
 	{
+		var hasENode     = Model.YourExitNodes.TryGetValue(node.Id, out var enode);
+		var eNodeEnabled = hasENode && (enode.Item1.Enabled && enode.Item2.Enabled);
+		
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
@@ -163,11 +196,95 @@ Logged in as
 				}
 			</td>
 			<td>
-				@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")
-				@* TODO: exit node markers, etc *@
+				<div>@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")</div>
+				@if (hasENode)
+				{
+				<div>Exit Node @(eNodeEnabled ? "Enabled" : "Advertised")</div>
+				}
 			</td>
 			<td>@node.User?.Name</td>
 		</tr>
+	}
+	</tbody>
+</table>
+
+
+<h2>Your Routes</h2>
+
+<p>Exit nodes are not shown here.</p>
+
+<table>
+	<thead>
+	<th>Machine</th>
+	<th>Prefix</th>
+	<th>Advertised</th>
+	<th>Enabled</th>
+	<th>Actions</th>
+	</thead>
+	<tbody>
+	@foreach (var route in Model.YourOtherRoutes.OrderBy(r => r.Machine?.Id))
+	{
+	<tr>
+		<td>@route.Machine?.GivenName</td>
+		<td>@route.Prefix</td>
+		<td>@(route.Advertised ? "Yes" : "No")</td>
+		<td>@(route.Enabled ? "Yes" : "No")</td>
+		<td class="formwrap">
+			@if (route.Enabled)
+			{
+				<form asp-action="DisableRoute">
+					<input type="hidden" name="id" value="@route.Id" />
+					<button type="submit">Disable route</button>
+				</form>
+			}
+			else if (route.Advertised)
+			{
+				<form asp-action="EnableRoute">
+					<input type="hidden" name="id" value="@route.Id" />
+					<button type="submit">Enable route</button>
+				</form>
+			}
+
+			<form asp-action="DeleteRoute">
+				<input type="hidden" name="id" value="@route.Id" />
+				<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Delete Route</button>
+			</form>
+			<dialog>
+				<p>Delete this route? This is irreversible.</p>
+				<form asp-action="DeleteRoute">
+					<input type="hidden" name="id" value="@route.Id" />
+					<button type="submit">Yes, delete</button>
+				</form>
+				<form method="dialog">
+					<button type="submit">No!</button>
+				</form>
+			</dialog>
+		</td>
+	</tr>
+	}
+	</tbody>
+</table>
+
+<h2>Other Users' Routes</h2>
+
+<p>Exit nodes are not shown here.</p>
+
+<table>
+	<thead>
+	<th>Machine</th>
+	<th>Prefix</th>
+	<th>Advertised</th>
+	<th>Enabled</th>
+	</thead>
+	<tbody>
+	@foreach (var route in Model.OtherOtherRoutes.OrderBy(r => r.Machine?.User?.Name).ThenBy(r => r.Machine?.Id))
+	{
+	<tr>
+		<td>@route.Machine?.GivenName</td>
+		<td>@route.Prefix</td>
+		<td>@(route.Advertised ? "Yes" : "No")</td>
+		<td>@(route.Enabled ? "Yes" : "No")</td>
+	</tr>
 	}
 	</tbody>
 </table>
@@ -178,5 +295,7 @@ Logged in as
 		border: 1px solid grey;
 		padding: .25rem .75rem;
 	}
+	/*.inlinewrap { display: contents; }*/
+	.formwrap > form { display: inline; }
 </style>
 <noscript><style>.js-only-action { display: none }</style></noscript>
