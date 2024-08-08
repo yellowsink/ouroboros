@@ -7,12 +7,15 @@ ViewData["Title"] = "Register";
 
 <p>Do you want to add the node with key <code>@Model.TrimmedNK</code>?</p>
 <p>You are logged in as @Model.User.GithubPretty (@Model.User.HeadscaleName).</p>
-<form asp-controller="Auth" asp-action="Logout">
-	<input type="hidden" name="then" value="/register/nodekey:@Model.TrimmedNK" />
-	<button type="submit">Click here to log out</button>
-</form>
 
-<form asp-action="Add">
-	<input type="hidden" name="nodekey" value="@Model.TrimmedNK" />
-	<button type="submit">Add this node</button>
-</form>
+<div class="formwrap" style="display: contents">
+	<form asp-controller="Auth" asp-action="Logout">
+		<input type="hidden" name="then" value="/register/nodekey:@Model.TrimmedNK" />
+		<button type="submit">Click here to log out</button>
+	</form>
+
+	<form asp-action="Add">
+		<input type="hidden" name="nodekey" value="@Model.TrimmedNK" />
+		<button type="submit">Add this node</button>
+	</form>
+</div>

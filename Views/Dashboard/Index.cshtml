@@ -8,10 +8,12 @@
 Logged in as
 @(Model.User.GithubPretty ?? Model.User.GithubName) (@Model.User.HeadscaleName on Headscale)
 
-<form asp-controller="Auth" asp-action="Logout">
-	<input type="hidden" name="then" value="/ouroboros/dashboard"/>
-	<button type="submit">Click here to log out</button>
-</form>
+<div class="formwrap" style="display: contents">
+	<form asp-controller="Auth" asp-action="Logout">
+		<input type="hidden" name="then" value="/ouroboros/dashboard"/>
+		<button type="submit">Click here to log out</button>
+	</form>
+</div>
 
 <details>
 	<summary>Add a device...</summary>
@@ -128,7 +130,7 @@ Logged in as
 				</dialog>
 
 				@* requires js because using <details> here would be horrid. *@
-				<button class="js-only-action" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</button>
+				<button class="js-only" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Rename</button>
 				<dialog>
 					@if (node.GivenName == node.Name)
 					{
@@ -288,14 +290,3 @@ Logged in as
 	}
 	</tbody>
 </table>
-
-<style>
-	table { border-collapse: collapse; }
-	td {
-		border: 1px solid grey;
-		padding: .25rem .75rem;
-	}
-	/*.inlinewrap { display: contents; }*/
-	.formwrap > form { display: inline; }
-</style>
-<noscript><style>.js-only-action { display: none }</style></noscript>
