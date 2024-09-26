@@ -224,10 +224,10 @@ Logged in as
 	<th>Actions</th>
 	</thead>
 	<tbody>
-	@foreach (var route in Model.YourOtherRoutes.OrderBy(r => r.Machine?.Id))
+	@foreach (var route in Model.YourOtherRoutes.OrderBy(r => r.Node?.Id))
 	{
 	<tr>
-		<td>@route.Machine?.GivenName</td>
+		<td>@route.Node?.GivenName</td>
 		<td>@route.Prefix</td>
 		<td>@(route.Advertised ? "Yes" : "No")</td>
 		<td>@(route.Enabled ? "Yes" : "No")</td>
@@ -279,10 +279,10 @@ Logged in as
 	<th>Enabled</th>
 	</thead>
 	<tbody>
-	@foreach (var route in Model.OtherOtherRoutes.OrderBy(r => r.Machine?.User?.Name).ThenBy(r => r.Machine?.Id))
+	@foreach (var route in Model.OtherOtherRoutes.OrderBy(r => r.Node?.User?.Name).ThenBy(r => r.Node?.Id))
 	{
 	<tr>
-		<td>@route.Machine?.GivenName</td>
+		<td>@route.Node?.GivenName</td>
 		<td>@route.Prefix</td>
 		<td>@(route.Advertised ? "Yes" : "No")</td>
 		<td>@(route.Enabled ? "Yes" : "No")</td>

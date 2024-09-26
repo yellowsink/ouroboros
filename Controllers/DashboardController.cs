@@ -20,7 +20,7 @@ public class DashboardController : Controller
 	{
 		var routes = await Headscale.RoutesList();
 		var route  = routes.FirstOrDefault(n => n.Id == id);
-		return await NodeIsOwned(route?.Machine?.Id ?? -1);
+		return await NodeIsOwned(route?.Node?.Id ?? -1);
 	}
 	
 	public async Task<IActionResult> Index()
@@ -36,8 +36,8 @@ public class DashboardController : Controller
 		var yourNodes  = nodes.Where(n => n.User?.Name == user.HeadscaleName).ToArray();
 		var otherNodes = nodes.Where(n => n.User?.Name != user.HeadscaleName).ToArray();
 
-		var yourRoutes  = routes.Where(r => yourNodes.Any(n => r.Machine?.Id == n.Id)).ToArray();
-		var otherRoutes = routes.Where(r => yourNodes.All(n => r.Machine?.Id != n.Id)).ToArray();
+		var yourRoutes  = routes.Where(r => yourNodes.Any(n => r.Node?.Id == n.Id)).ToArray();
+		var otherRoutes = routes.Where(r => yourNodes.All(n => r.Node?.Id != n.Id)).ToArray();
 
 		var yourExitNodes = FindExitNodes(yourNodes,  yourRoutes);
 		var otherExitNodes = FindExitNodes(otherNodes, otherRoutes);
@@ -67,8 +67,8 @@ public class DashboardController : Controller
 			{
 				// find matching routes
 				// double enumeration? honestly, bleh. its fine.
-				var r4 = routes.FirstOrDefault(r => r.Machine?.Id == node.Id && r.Prefix == "0.0.0.0/0");
-				var r6 = routes.FirstOrDefault(r => r.Machine?.Id == node.Id && r.Prefix == "::/0");
+				var r4 = routes.FirstOrDefault(r => r.Node?.Id == node.Id && r.Prefix == "0.0.0.0/0");
+				var r6 = routes.FirstOrDefault(r => r.Node?.Id == node.Id && r.Prefix == "::/0");
 
 				if (r4?.Advertised == true && r6?.Advertised == true)
 					target[node.Id] = (r4, r6);

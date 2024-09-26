@@ -127,7 +127,7 @@ public static class Headscale
 	public sealed class HeadscaleRoute
 	{
 		public int                Id         { get; set; }
-		public HeadscaleNode?     Machine    { get; set; }
+		public HeadscaleNode?     Node    { get; set; }
 		public string?            Prefix     { get; set; }
 		public bool               Advertised { get; set; }
 		public bool               Enabled    { get; set; }
