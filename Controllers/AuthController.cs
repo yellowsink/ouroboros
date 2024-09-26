@@ -42,14 +42,14 @@ public class AuthController : Controller
 		return Redirect(then);
 	}
 
-	public IActionResult Index(string? nodeKey)
+	public IActionResult Index(string? mKey)
 		=> View(
 			new AuthIndexModel(
 				Convert.ToBase64String(
-					nodeKey == null
+					mKey == null
 						? "/ouroboros/dashboard"u8
-						: Encoding.UTF8.GetBytes($"/register/nodekey:{nodeKey}")),
-				nodeKey == null ? "to access the dashboard" : "to add a node"));
+						: Encoding.UTF8.GetBytes($"/register/mkey:{mKey}")),
+				mKey == null ? "to access the dashboard" : "to add a node"));
 	
 	private async Task<GhUserRes> GetUser(string accessToken)
 	{

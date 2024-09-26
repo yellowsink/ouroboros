@@ -10,12 +10,12 @@ ViewData["Title"] = "Register";
 
 <div class="formwrap" style="display: contents">
 	<form asp-controller="Auth" asp-action="Logout">
-		<input type="hidden" name="then" value="/register/nodekey:@Model.TrimmedNK" />
+		<input type="hidden" name="then" value="/register/mkey:@Model.TrimmedNK" />
 		<button type="submit">Click here to log out</button>
 	</form>
 
 	<form asp-action="Add">
-		<input type="hidden" name="nodekey" value="@Model.TrimmedNK" />
+		<input type="hidden" name="mkey" value="@Model.TrimmedNK" />
 		<button type="submit">Add this node</button>
 	</form>
 </div>

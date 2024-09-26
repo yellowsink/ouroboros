@@ -5,30 +5,30 @@ namespace Ouroboros.Controllers;
 
 public class RegisterController : Controller
 {
-	[Route("/register/{nodeKey}")]
+	[Route("/register/{mKey}")]
 	[HttpGet]
-	public IActionResult Index(string? nodeKey)
+	public IActionResult Index(string? mKey)
 	{
-		if (nodeKey == null || !nodeKey.StartsWith("nodekey:"))
-			return BadRequest("not a valid nodekey.");
+		if (mKey == null || !mKey.StartsWith("mkey:"))
+			return BadRequest("not a valid mkey.");
 		
-		var trimmedNk = nodeKey[8..];
+		var trimmedNk = mKey["mkey:".Length..];
 		
 		var user = AuthedUser.FromCtx(HttpContext);
 		if (user == null)
-			return Redirect($"/ouroboros/auth?nodekey={trimmedNk}");
+			return Redirect($"/ouroboros/auth?mkey={trimmedNk}");
 
 		return View(new RegisterIndexModel(user, trimmedNk));
 	}
 
 	[HttpPost]
-	public async Task<IActionResult> Add(string? nodeKey)
+	public async Task<IActionResult> Add(string? mKey)
 	{
-		if (nodeKey == null) return BadRequest();
+		if (mKey == null) return BadRequest();
 		var user = AuthedUser.FromCtx(HttpContext);
 		if (user == null) return Unauthorized();
 
-		await Headscale.NodeRegister(user.HeadscaleName, "nodekey:" + nodeKey);
+		await Headscale.NodeRegister(user.HeadscaleName, "mkey:" + mKey);
 		return Redirect("/ouroboros/dashboard");
 	}
 }

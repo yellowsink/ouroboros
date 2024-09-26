@@ -1,6 +1,6 @@
 # Ouroboros
 
-Ouroboros is a small UI on top of [headscale](https://github.com/juanfont/headscale), which takes a pragmatic approach.
+Ouroboros is a small UI on top of [headscale](https://github.com/juanfont/headscale) 0.23.0, which takes a pragmatic approach.
 
 ## Goals
 - Allow users to fully control and manage their own devices
@@ -73,13 +73,17 @@ your.server.com {
 
 Done!
 
+Note that if headscale is getting its TLS through caddy, you won't be able to use its built-in TLS support.
+This means to get gRPC working to work with ouroboros, you'll need to enable insecure gRPC.
+Make sure that gRPC is only exposed via caddy or not at all, in this case.
+
 ## Docker
 
 Create a container with environment variables like this:
 ```yml
 services:
   ouroboros:
-    image: yellosink/ouroboros:0.1.0
+    image: yellosink/ouroboros:0.3.1
     ports: ["8080:5000"]
     environment:
     - HS_IS_REMOTE=true
