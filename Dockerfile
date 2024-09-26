@@ -9,9 +9,9 @@ RUN dotnet restore
 RUN dotnet publish -c Release -o out
 
 # obtain headscale
-RUN wget https://github.com/juanfont/headscale/releases/download/v0.22.3/headscale_0.22.3_linux_amd64
-RUN chmod +x headscale_0.22.3_linux_amd64
-RUN mv headscale_0.22.3_linux_amd64 out
+RUN wget https://github.com/juanfont/headscale/releases/download/v0.23.0/headscale_0.23.0_linux_amd64
+RUN chmod +x headscale_0.23.0_linux_amd64
+RUN mv headscale_0.23.0_linux_amd64 out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:6c4df091e4e531bb93bdbfe7e7f0998e7ced344f54426b7e874116a3dc3233ff

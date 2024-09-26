@@ -2,7 +2,7 @@
   "hs_is_remote": "<DOCKER_IS_REMOTE>",
   "hs_address": "<DOCKER_ADDRESS>",
   "hs_api_key": "<DOCKER_API_KEY>",
-  "hs_bin_path": "./headscale_0.22.3_linux_amd64",
+  "hs_bin_path": "./headscale_0.23.0_linux_amd64",
   "hs_login_url": "<DOCKER_LOGIN_URL>",
   "gh_client_id": "<DOCKER_CLIENT_ID>",
   "gh_client_secret": "<DOCKER_CLIENT_SECRET>",
