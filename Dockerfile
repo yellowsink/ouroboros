@@ -13,6 +13,9 @@ RUN wget https://github.com/juanfont/headscale/releases/download/v0.23.0/headsca
 RUN chmod +x headscale_0.23.0_linux_amd64
 RUN mv headscale_0.23.0_linux_amd64 out
 
+# headscale will error without a config file existing, even though its unnecessary for our use case. empty works.
+RUN touch out/config.yaml
+
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:6c4df091e4e531bb93bdbfe7e7f0998e7ced344f54426b7e874116a3dc3233ff
 WORKDIR /App
