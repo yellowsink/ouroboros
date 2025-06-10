@@ -11,15 +11,11 @@ namespace Ouroboros;
  *   [x] register
  *   [x] rename
  *   [x] tag
+ *   [x] approve-routes
  * [ ] preauthkeys:
  *   [ ] create
  *   [ ] expire
  *   [ ] list
- * [x] routes:
- *   [x] delete
- *   [x] disable
- *   [x] enable
- *   [x] list
  */
 
 /// <summary>
@@ -77,17 +73,8 @@ public static class Headscale
 		return JsonSerializer.Deserialize<HeadscaleNode>(await Invoke(args), Jso)!;
 	}*/
 
-	public static async Task<HeadscaleRoute[]> RoutesList()
-		=> JsonSerializer.Deserialize<HeadscaleRoute[]>(await Invoke("routes", "list"), Jso)!;
-	
-	public static async Task<bool> RouteEnable(uint id)
-		=> (await Invoke("routes", "enable", "-r", id.ToString())).Trim() == "{}";
-	
-	public static async Task<bool> RouteDisable(uint id)
-		=> (await Invoke("routes", "disable", "-r", id.ToString())).Trim() == "{}";
-	
-	public static async Task<bool> RouteDelete(uint id)
-		=> (await Invoke("routes", "delete", "-r", id.ToString())).Trim() == "{}";
+	public static async Task NodeApproveRoutes(int nodeId, IEnumerable<string> routes)
+		=> await Invoke("nodes", "approve-routes", "-i", nodeId.ToString(), "-r", string.Join(",", routes));
 
 	public struct HeadscaleTimestamp
 	{
@@ -101,37 +88,41 @@ public static class Headscale
 
 	public sealed class HeadscaleUser
 	{
-		public string?            Id        { get; set; }
+		public int            Id        { get; set; }
 		public string?            Name      { get; set; }
 		public HeadscaleTimestamp CreatedAt { get; set; }
 	}
 
 	public sealed class HeadscaleNode
 	{
-		public int                Id                   { get; set; }
-		public string?            MachineKey           { get; set; }
-		public string?            NodeKey              { get; set; }
-		public string?            DiscoKey             { get; set; }
-		public string[]?          IpAddresses          { get; set; }
-		public string?            Name                 { get; set; }
-		public HeadscaleUser?     User                 { get; set; }
-		public HeadscaleTimestamp LastSeen             { get; set; }
-		public HeadscaleTimestamp LastSuccessfulUpdate { get; set; }
-		public HeadscaleTimestamp Expiry               { get; set; }
-		public HeadscaleTimestamp CreatedAt            { get; set; }
-		public string[]?          ForcedTags           { get; set; }
-		public string?            GivenName            { get; set; }
-		public bool               Online               { get; set; }
-	}
+		public int                 Id                   { get; set; }
+		public string?             MachineKey           { get; set; }
+		public string?             NodeKey              { get; set; }
+		public string?             DiscoKey             { get; set; }
+		public string[]?           IpAddresses          { get; set; }
+		public string?             Name                 { get; set; }
+		public HeadscaleUser?      User                 { get; set; }
+		public HeadscaleTimestamp  LastSeen             { get; set; }
+		public HeadscaleTimestamp? LastSuccessfulUpdate { get; set; }
+		public HeadscaleTimestamp  Expiry               { get; set; }
+		public HeadscaleTimestamp  CreatedAt            { get; set; }
+		public int                 RegisterMethod       { get; set; }
+		public string[]?           ForcedTags           { get; set; }
+		public string?             GivenName            { get; set; }
+		public bool                Online               { get; set; }
+		// routes that are allowed by headscale, freely settable
+		public string[]?           ApprovedRoutes       { get; set; }
+		// routes that the node offers
+		public string[]?           AvailableRoutes      { get; set; }
+		// SubnetRoutes = ApprovedRoutes intersect AvailableRoutes, actually valid and served routes
+		public string[]?           SubnetRoutes         { get; set; }
+		
+		// convenience properties
+		public bool OAdvertisesExitNode => AvailableRoutes != null
+										&& (AvailableRoutes.Contains("0.0.0.0/0") || AvailableRoutes.Contains("::/0"));
 
-	public sealed class HeadscaleRoute
-	{
-		public int                Id         { get; set; }
-		public HeadscaleNode?     Node    { get; set; }
-		public string?            Prefix     { get; set; }
-		public bool               Advertised { get; set; }
-		public bool               Enabled    { get; set; }
-		public HeadscaleTimestamp CreatedAt  { get; set; }
-		public HeadscaleTimestamp UpdatedAt  { get; set; }
+		public bool OApprovedExitNode => ApprovedRoutes != null
+									  && (ApprovedRoutes.Contains("0.0.0.0/0") || ApprovedRoutes.Contains("::/0"));
+
 	}
 }

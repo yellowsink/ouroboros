@@ -1,6 +1,14 @@
 # Ouroboros
 
-Ouroboros is a small UI on top of [headscale](https://github.com/juanfont/headscale) 0.23.0, which takes a pragmatic approach.
+Ouroboros is a small UI on top of [headscale](https://github.com/juanfont/headscale), which takes a pragmatic approach.
+
+Only the latest version of ouroboros is supported at any given point, but the known working versions of Headscale
+for each version of Ouroboros are listed below:
+
+| Ouroboros version | Headscale version(s) |
+|-------------------|----------------------|
+| 0.4.0             | 0.26.1               |
+| 0.3.1             | 0.23.0               |
 
 ## Goals
 - Allow users to fully control and manage their own devices
@@ -83,7 +91,7 @@ Create a container with environment variables like this:
 ```yml
 services:
   ouroboros:
-    image: yellosink/ouroboros:0.3.1
+    image: yellosink/ouroboros:0.4.0
     ports: ["8080:5000"]
     environment:
     - HS_IS_REMOTE=true

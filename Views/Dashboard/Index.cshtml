@@ -1,4 +1,5 @@
-﻿@model Ouroboros.Models.DashboardModel
+﻿@using System.Text.Json
+@model Ouroboros.Models.DashboardModel
 @{
 	ViewData["Title"] = "Dashboard";
 }
@@ -17,33 +18,32 @@ Logged in as
 
 <details>
 	<summary>Add a device...</summary>
-	
+
 	<div style="padding-left: .5rem; margin-left: .5rem; border-left: 1px solid gray">
 		<h2>Add a device interactively</h2>
-        	
-        <p>The login server URL is <code>https://@Config.C.hs_login_url</code>.</p>
-        
-        <p>On Linux, you can use <code>tailscale up --login-server=https://@Config.C.hs_login_url</code>.</p>
-        <p>
-        	On Android, you repeatedly open the menu on the menu on the login screen until you have the
-        	<code>Change Server</code> option.
-        </p>
-        <p>
-        	On Windows, you can edit the registry <a href="https://headscale.net/windows-client/">as shown here</a>.
-        	Supposedly you can also use the command line as is on Linux, but this may have config persistence issues.
-        </p>
-        <p>
-        	On iOS, you can find Tailscale in the iOS settings app, and put the login server URL into
-        	<code>Alternative Coordination Server URL</code>.
-        </p>
-        
+
+		<p>The login server URL is <code>https://@Config.C.hs_login_url</code>.</p>
+
+		<p>On Windows and Linux, you can use <code>tailscale up --login-server=https://@Config.C.hs_login_url</code>.</p>
+		<p>
+			On Android, open the account menu, click "Accounts", select "Use an alternative server"
+		</p>
+		<p>
+			On iOS, you can find Tailscale in the iOS settings app, and put the login server URL into
+			<code>Alternative Coordination Server URL</code>.
+		</p>
+		<p>
+			On macOS, option-click the tailscale icon and go to "Debug" > "Custom Login Server" > "Add Account...",
+			then enter the login server URL.
+		</p>
+
 		@*<h2>Add a device via auth key</h2>
 		<p>
 			See instructions on using auth keys <a href="https://tailscale.com/kb/1085/auth-keys">here</a>.
 		</p>
 		<details>
 			<summary>Generate an auth key</summary>
-			
+
 			<form style="padding-left: .5rem; margin-left: .5rem; border-left: 1px solid gray">
 				<div>
 					<label for="genkey-reusable">Reusable</label>
@@ -56,7 +56,7 @@ Logged in as
 				<button type="submit">Generate</button>
 			</form>
 		</details>
-		
+
 		@if (false) $1$ Model.Keys.Length > 0 #1#
 		{
 			<h3>Existing auth keys</h3>
@@ -69,19 +69,22 @@ Logged in as
 
 <h2>Your Nodes</h2>
 
+<p>Only routes advertised by the node are listed, and inactive (non-approved) ones are in <em>italics</em>.</p>
+
 <table>
 	<thead>
 	<th>Name</th>
 	<th>IP Addresses</th>
+	<th>Routes</th>
 	<th>Status</th>
 	<th>Actions</th>
 	</thead>
 	<tbody>
 	@foreach (var node in Model.YourNodes)
 	{
-		var hasENode = Model.YourExitNodes.TryGetValue(node.Id, out var enode);
-		var eNodeEnabled = hasENode && (enode.Item1.Enabled && enode.Item2.Enabled);
-		
+		var hasENode     = node.OAdvertisesExitNode;
+		var eNodeEnabled = node.OApprovedExitNode && hasENode;
+
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
@@ -91,17 +94,43 @@ Logged in as
 				}
 			</td>
 			<td>
-				<div>@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")</div>
 				@if (hasENode)
 				{
-					<div>Exit Node @(eNodeEnabled ? "Enabled" : "Advertised")</div>
+					if (eNodeEnabled)
+					{
+						<div>Exit Node</div>
+					}
+					else
+					{
+						<div><em>Exit Node</em></div>
+					}
+				}
+				@{
+					var routes = new List<string>(node.AvailableRoutes ?? []);
+					routes.Remove("0.0.0.0/0");
+					routes.Remove("::/0");
+
+					var approved = new HashSet<string>(node.ApprovedRoutes ?? []);
+
+					foreach (var route in routes)
+					{
+						if (approved.Contains(route))
+						{
+							<div><code>@route</code></div>
+						}
+						else
+						{
+							<div><em><code>@route</code></em></div>
+						}
+					}
 				}
 			</td>
+			<td>@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")</td>
 			<td class="formwrap">
 				@* make this work without js, with js html5 dialog will override it. *@
 				<form asp-action="DeleteNode">
 					<input type="hidden" name="id" value="@node.Id" />
-					<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Delete node</button>
+					<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Delete</button>
 				</form>
 				<dialog>
 					<p>Delete this node? this is irreversible.</p>
@@ -116,7 +145,7 @@ Logged in as
 
 				<form asp-action="ExpireNode">
 					<input type="hidden" name="id" value="@node.Id" />
-					<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Logout node</button>
+					<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Logout</button>
 				</form>
 				<dialog>
 					<p>Logout (expire) this node? It will remain setup on your tailnet but need reregistering to come online.</p>
@@ -150,21 +179,64 @@ Logged in as
 						<button type="submit">Cancel</button>
 					</form>
 				</dialog>
-				
-				
+
+				@* requires js because using <details> here would be horrid. *@
+				<button class="js-only" onclick="this.nextElementSibling.showModal(); event.preventDefault()">Manage Routes</button>
+				<dialog class="route-management-dialog"
+				        data-available-routes="@JsonSerializer.Serialize(node.AvailableRoutes ?? [])"
+				        data-approved-routes="@JsonSerializer.Serialize(node.ApprovedRoutes ?? [])">
+					<p>Pick the subnet routes that will be approved for @node.GivenName</p>
+					
+					<table>
+						<thead>
+						<th>Route</th>
+						<th>Approve</th>
+						<th>Advertised</th>
+						</thead>
+
+						<tbody>
+						</tbody>
+					</table>
+
+					<div style="display: flex; margin-top: .5rem; margin-bottom: 1rem">
+						<input type="text" class="route-add-input" />
+						<button class="route-add-btn">Add</button>
+					</div>
+
+					<div style="display: flex">
+						<form method="dialog">
+							<button type="submit">Cancel</button>
+						</form>
+						<form asp-action="SetNodeRoutes">
+							<input type="hidden" name="id" value="@node.Id" />
+							<input class="route-target" type="hidden" name="routes" value="@JsonSerializer.Serialize(node.ApprovedRoutes ?? [])" />
+							<button type="submit">Apply</button>
+						</form>
+					</div>
+				</dialog>
+
+
 				@if (eNodeEnabled)
 				{
-				<form asp-action="DisableENode">
-					<input type="hidden" name="id4" value="@enode.Item1.Id" />
-					<input type="hidden" name="id6" value="@enode.Item2.Id" />
+					var toBeApproved = new List<string>(node.ApprovedRoutes ?? []);
+					toBeApproved.Remove("0.0.0.0/0");
+					toBeApproved.Remove("::/0");
+
+				<form asp-action="SetNodeRoutes">
+					<input type="hidden" name="id" value="@node.Id" />
+					<input type="hidden" name="routes" value="@JsonSerializer.Serialize(toBeApproved)" />
 					<button type="submit">Disable Exit Node</button>
 				</form>
 				}
 				else if (hasENode)
 				{
-				<form asp-action="EnableENode">
-					<input type="hidden" name="id4" value="@enode.Item1.Id" />
-					<input type="hidden" name="id6" value="@enode.Item2.Id" />
+					var toBeApproved = new List<string>(node.ApprovedRoutes ?? []);
+					if (!toBeApproved.Contains("0.0.0.0/0")) toBeApproved.Add("0.0.0.0/0");
+					if (!toBeApproved.Contains("::/0")) toBeApproved.Add("::/0");
+
+				<form asp-action="SetNodeRoutes">
+					<input type="hidden" name="id" value="@node.Id" />
+					<input type="hidden" name="routes" value="@JsonSerializer.Serialize(toBeApproved)" />
 					<button type="submit">Enable Exit Node</button>
 				</form>
 				}
@@ -176,19 +248,19 @@ Logged in as
 
 <h2>Other Users' Nodes</h2>
 
+<p>Only currently active (approved <em>and</em> advertised) routes are listed.</p>
+
 <table>
 	<thead>
 	<th>Name</th>
 	<th>IP Addresses</th>
+	<th>Routes</th>
 	<th>Status</th>
 	<th>Owner</th>
 	</thead>
 	<tbody>
 	@foreach (var node in Model.OtherNodes.OrderBy(n => n.User?.Id).ThenBy(n => n.Id))
 	{
-		var hasENode     = Model.YourExitNodes.TryGetValue(node.Id, out var enode);
-		var eNodeEnabled = hasENode && (enode.Item1.Enabled && enode.Item2.Enabled);
-		
 		<tr>
 			<td>@node.GivenName @(node.GivenName != node.Name ? $"({node.Name})" : "")</td>
 			<td>
@@ -198,95 +270,116 @@ Logged in as
 				}
 			</td>
 			<td>
-				<div>@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")</div>
-				@if (hasENode)
+				@if (node.OAdvertisesExitNode && node.OApprovedExitNode)
 				{
-				<div>Exit Node @(eNodeEnabled ? "Enabled" : "Advertised")</div>
+					<div>Exit Node</div>
+				}
+				@{
+					var routes = new List<string>(node.AvailableRoutes ?? []);
+					routes.Remove("0.0.0.0/0");
+					routes.Remove("::/0");
+
+					var approved = new HashSet<string>(node.ApprovedRoutes ?? []);
+
+					foreach (var route in routes.Where(route => approved.Contains(route)))
+					{
+						<div><code>@route</code></div>
+					}
 				}
 			</td>
+			<td>@(node.Online ? "Online" : $"Last seen {node.LastSeen.Parse()}")</td>
 			<td>@node.User?.Name</td>
 		</tr>
 	}
 	</tbody>
 </table>
 
-
-<h2>Your Routes</h2>
-
-<p>Exit nodes are not shown here.</p>
-
-<table>
-	<thead>
-	<th>Machine</th>
-	<th>Prefix</th>
-	<th>Advertised</th>
-	<th>Enabled</th>
-	<th>Actions</th>
-	</thead>
-	<tbody>
-	@foreach (var route in Model.YourOtherRoutes.OrderBy(r => r.Node?.Id))
+<script>
+	// route management table code
+	
+	const dialogs = document.getElementsByClassName("route-management-dialog");
+	
+	for (const dialog of dialogs)
 	{
-	<tr>
-		<td>@route.Node?.GivenName</td>
-		<td>@route.Prefix</td>
-		<td>@(route.Advertised ? "Yes" : "No")</td>
-		<td>@(route.Enabled ? "Yes" : "No")</td>
-		<td class="formwrap">
-			@if (route.Enabled)
-			{
-				<form asp-action="DisableRoute">
-					<input type="hidden" name="id" value="@route.Id" />
-					<button type="submit">Disable route</button>
-				</form>
-			}
-			else if (route.Advertised)
-			{
-				<form asp-action="EnableRoute">
-					<input type="hidden" name="id" value="@route.Id" />
-					<button type="submit">Enable route</button>
-				</form>
-			}
-
-			<form asp-action="DeleteRoute">
-				<input type="hidden" name="id" value="@route.Id" />
-				<button type="submit" onclick="this.parentElement.nextElementSibling.showModal(); event.preventDefault()">Delete Route</button>
-			</form>
-			<dialog>
-				<p>Delete this route? This is irreversible.</p>
-				<form asp-action="DeleteRoute">
-					<input type="hidden" name="id" value="@route.Id" />
-					<button type="submit">Yes, delete</button>
-				</form>
-				<form method="dialog">
-					<button type="submit">No!</button>
-				</form>
-			</dialog>
-		</td>
-	</tr>
+		const availableRoutes = JSON.parse(dialog.dataset.availableRoutes);
+		const approvedRoutes = JSON.parse(dialog.dataset.approvedRoutes);
+		
+		handleTable(
+			dialog.querySelector("tbody"),
+			dialog.querySelector(".route-target"),
+			dialog.querySelector(".route-add-input"),
+			dialog.querySelector(".route-add-btn"),
+			availableRoutes,
+			approvedRoutes
+		);
 	}
-	</tbody>
-</table>
-
-<h2>Other Users' Routes</h2>
-
-<p>Exit nodes are not shown here.</p>
-
-<table>
-	<thead>
-	<th>Machine</th>
-	<th>Prefix</th>
-	<th>Advertised</th>
-	<th>Enabled</th>
-	</thead>
-	<tbody>
-	@foreach (var route in Model.OtherOtherRoutes.OrderBy(r => r.Node?.User?.Name).ThenBy(r => r.Node?.Id))
+	
+	function handleTable(table, routeTarget, addInput, addBtn, availableRoutes, approvedRoutes)
 	{
-	<tr>
-		<td>@route.Node?.GivenName</td>
-		<td>@route.Prefix</td>
-		<td>@(route.Advertised ? "Yes" : "No")</td>
-		<td>@(route.Enabled ? "Yes" : "No")</td>
-	</tr>
+		const advertisedRoutes = new Set(availableRoutes);
+		
+		const displayRoutes = new Set(approvedRoutes).union(advertisedRoutes);
+		
+		const chosenRoutes = new Set(approvedRoutes);
+		
+		// remove exit nodes from display but leave them in the actual set to apply
+		displayRoutes.delete("0.0.0.0/0");
+		displayRoutes.delete("::/0");
+		
+		// setup add input
+		addBtn.onclick = () => {
+			if (!displayRoutes.has(addInput.value)) {
+				displayRoutes.add(addInput.value);
+				chosenRoutes.add(addInput.value);
+				
+				applyChanges();
+			}
+
+			addInput.value = "";
+		};
+		
+		applyChanges();
+		
+		function applyChanges() {
+			// remove table items
+			while (table.firstChild)
+				table.removeChild(table.firstChild);
+
+			// add table items
+			for (const route of displayRoutes) {
+				const tr = document.createElement("tr");
+				
+				const td1 = document.createElement("td");
+				td1.textContent = route;
+				
+				const td2 = document.createElement("td");
+				const input1 = document.createElement("input");
+				input1.type = "checkbox";
+				const enabled = chosenRoutes.has(route);
+				input1.checked = enabled;
+				input1.onchange = () => {
+					if (enabled) chosenRoutes.delete(route);
+					else chosenRoutes.add(route);
+					applyChanges();
+				}
+				td2.append(input1);
+				
+				const td3 = document.createElement("td");
+				const input2 = document.createElement("input");
+				input2.type = "checkbox";
+				input2.disabled = true;
+				input2.checked = advertisedRoutes.has(route);
+				td3.append(input2);
+				
+				tr.append(td1);
+				tr.append(td2);
+				tr.append(td3);
+				
+				table.append(tr);
+			}
+			
+			// set form
+			routeTarget.value = JSON.stringify([...chosenRoutes]);
+		}
 	}
-	</tbody>
-</table>
+</script>
