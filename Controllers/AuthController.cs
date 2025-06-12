@@ -48,7 +48,7 @@ public class AuthController : Controller
 				Convert.ToBase64String(
 					mKey == null
 						? "/ouroboros/dashboard"u8
-						: Encoding.UTF8.GetBytes($"/register/mkey:{mKey}")),
+						: Encoding.UTF8.GetBytes($"/register/{mKey}")),
 				mKey == null ? "to access the dashboard" : "to add a node"));
 	
 	private async Task<GhUserRes> GetUser(string accessToken)

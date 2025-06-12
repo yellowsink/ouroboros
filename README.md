@@ -5,10 +5,10 @@ Ouroboros is a small UI on top of [headscale](https://github.com/juanfont/headsc
 Only the latest version of ouroboros is supported at any given point, but the known working versions of Headscale
 for each version of Ouroboros are listed below:
 
-| Ouroboros version | Headscale version(s) |
-|-------------------|----------------------|
-| 0.4.0, 0.4.1      | 0.26.1               |
-| 0.3.1             | 0.23.0               |
+| Ouroboros version   | Headscale version(s) |
+|---------------------|----------------------|
+| 0.4.0, 0.4.1, 0.4.2 | 0.26.1               |
+| 0.3.1               | 0.23.0               |
 
 ## Goals
 - Allow users to fully control and manage their own devices
