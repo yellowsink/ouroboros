@@ -7,7 +7,7 @@ for each version of Ouroboros are listed below:
 
 | Ouroboros version | Headscale version(s) |
 |-------------------|----------------------|
-| 0.4.0             | 0.26.1               |
+| 0.4.0, 0.4.1      | 0.26.1               |
 | 0.3.1             | 0.23.0               |
 
 ## Goals

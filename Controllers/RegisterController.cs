@@ -9,16 +9,14 @@ public class RegisterController : Controller
 	[HttpGet]
 	public IActionResult Index(string? mKey)
 	{
-		if (mKey == null || !mKey.StartsWith("mkey:"))
+		if (mKey is not { Length: 24 })
 			return BadRequest("not a valid mkey.");
-		
-		var trimmedNk = mKey["mkey:".Length..];
-		
+
 		var user = AuthedUser.FromCtx(HttpContext);
 		if (user == null)
-			return Redirect($"/ouroboros/auth?mkey={trimmedNk}");
+			return Redirect($"/ouroboros/auth?mkey={mKey}");
 
-		return View(new RegisterIndexModel(user, trimmedNk));
+		return View(new RegisterIndexModel(user, mKey));
 	}
 
 	[HttpPost]
@@ -28,7 +26,7 @@ public class RegisterController : Controller
 		var user = AuthedUser.FromCtx(HttpContext);
 		if (user == null) return Unauthorized();
 
-		await Headscale.NodeRegister(user.HeadscaleName, "mkey:" + mKey);
+		await Headscale.NodeRegister(user.HeadscaleName, mKey);
 		return Redirect("/ouroboros/dashboard");
 	}
 }
